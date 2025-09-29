@@ -40,22 +40,18 @@ export const authConfig = {
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   callbacks: {
-    jwt: async ({ token, user, account }) => {
-      // Initial sign in
-      if (account && user) {
-        return {
-          ...token,
-          id: user.id,
-        };
-      }
-      return token;
-    },
     session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: token.id as string,
+        id: token.sub!, // 'sub' is the standard JWT field for user ID
       },
     }),
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
   },
 } satisfies NextAuthConfig;
