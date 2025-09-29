@@ -16,7 +16,7 @@ import { Loader2, UploadCloud } from "lucide-react";
 import { useState } from "react";
 import { generateUploadUrl } from "~/actions/s3";
 import { toast } from "sonner";
-import { processVideo } from "~/actions/generation";
+import { processVideo } from "~/actions/generations";
 import {
   Table,
   TableBody,
@@ -44,9 +44,10 @@ export function DashboardClient({
     }[];
   clips: Clip[];
 }) {
-
     const [files, setFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const router = useRouter();
 
     const handleDrop = (acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
@@ -56,14 +57,52 @@ export function DashboardClient({
         if (files.length === 0) return;
 
         const file = files[0];
+        if (!file) return;
+
         setUploading(true);
 
         try{
-            // Client -> bucket
-            // client -> nextjs backend to generate upload url
-            // client -> s3 with upload url
+            const { success, signedUrl, uploadedFileId } = await generateUploadUrl({
+                filename: file.name,
+                contentType: file.type,
+            });
+            if (!success) throw new Error("Failed to generate upload url");
+
+            const uploadResponse = await fetch(signedUrl, {
+                method: "PUT",
+                body: file,
+                headers: {
+                    "Content-Type": file.type,
+                },
+            });
+
+            if (!uploadResponse.ok) throw new Error("Upload failed with status: " + uploadResponse.status)
+            
+            await processVideo(uploadedFileId);
+
+            setFiles([])
+            
+            toast.success("Video uploaded successfully", {
+                description: "Your video has been queued for processing. Check the status below.",
+                duration: 5000,
+            });
+        } catch (error) {
+            toast.error("Upload failed", {
+                description: "Please try again",
+            });
+        } finally {
+            setUploading(false);
         }
-    }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        try {
+            router.refresh();
+        } finally {
+            setTimeout(() => setRefreshing(false), 1000);
+        }
+    };
 
     return (
         <div className="mx-auto flex max-w-5xl flex-col space-y-6 px-4 py-8">
@@ -103,7 +142,7 @@ export function DashboardClient({
                     disabled={uploading}
                     maxFiles={1}
                   >
-                    {(dropzone: DropzoneState) => (
+                    {() => (
                       <>
                         <div className="flex flex-col items-center justify-center space-y-4 rounded-lg p-10 text-center">
                           <UploadCloud className="text-muted-foreground h-12 w-12" />
@@ -185,7 +224,11 @@ export function DashboardClient({
                                   {item.filename}
                                 </TableCell>
                                 <TableCell className="text-muted-foreground text-sm">
-                                  {new Date(item.createdAt).toLocaleDateString()}
+                                  {new Date(item.createdAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit'
+                                  })}
                                 </TableCell>
                                 <TableCell>
                                   {item.status === "queued" && (
@@ -244,5 +287,4 @@ export function DashboardClient({
           </Tabs>
         </div>
       );
-    }
-    
+}

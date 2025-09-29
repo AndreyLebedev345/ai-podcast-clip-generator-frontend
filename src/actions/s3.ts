@@ -55,7 +55,7 @@ export async function generateUploadUrl(fileInfo: {
 
   return {
     success: true,
-    signedUrl: signedUrl as string,
+    signedUrl: signedUrl,
     key,
     uploadedFileId: uploadedFileDbRecord.id,
   };
