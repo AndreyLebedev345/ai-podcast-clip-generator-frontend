@@ -52,7 +52,7 @@ export const processVideo = inngest.createFunction(
         });
 
         await step.run("call-modal-endpoint", async () => {
-            await fetch(env.PROCESS_VIDEO_ENDPOINT as string, {
+            await fetch(env.PROCESS_VIDEO_ENDPOINT, {
                 method: "POST",
                 body: JSON.stringify({
                     s3_key: s3Key,
@@ -68,9 +68,10 @@ export const processVideo = inngest.createFunction(
             const folderPrefix = s3Key.split("/")[0]!;
 
             const allKeys = await listS3ObjectsByPrefix(folderPrefix);
+
             const clipKeys = allKeys.filter(
-                (key): key is string => 
-                    key !== undefined && key.endsWith("original.mp4")
+              (key): key is string =>
+                key !== undefined && !key.endsWith("original.mp4"),
             );
 
             if (clipKeys.length > 0) {
