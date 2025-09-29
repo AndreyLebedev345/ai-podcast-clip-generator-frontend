@@ -13,7 +13,7 @@ export default async function DashboardPage() {
         redirect('/signup')
     }
 
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     const userData = await db.user.findUnique({
         where: {

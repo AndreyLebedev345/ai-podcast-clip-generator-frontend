@@ -110,6 +110,7 @@ export const processVideo = inngest.createFunction(
                 }
 
         } catch (error) {
+            console.error("Error processing video", error);
             await step.run("set-status-processing", async () => {
                 await db.uploadedFile.update({
                     where: { id: uploadedFileId },

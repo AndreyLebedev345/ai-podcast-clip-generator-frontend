@@ -1,6 +1,6 @@
 "use client";
 
-import Dropzone, { type DropzoneState } from "shadcn-dropzone";
+import Dropzone from "shadcn-dropzone";
 import type { Clip } from "@prisma/client";
 import Link from "next/link";
 import { Button } from "./ui/button";
@@ -87,6 +87,7 @@ export function DashboardClient({
                 duration: 5000,
             });
         } catch (error) {
+            console.error("Upload failed", error);
             toast.error("Upload failed", {
                 description: "Please try again",
             });

@@ -1,8 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import Stripe from "stripe";
 
 import { db } from "~/server/db";
+import { env } from "~/env";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -47,5 +49,28 @@ export const authConfig = {
         id: token.sub!,
       },
     }),
+  },
+  events: {
+    createUser: async ({ user }) => {
+      // Create Stripe customer when a new user signs up
+      if (!user.email) return;
+
+      try {
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+
+        const stripeCustomer = await stripe.customers.create({
+          email: user.email.toLowerCase(),
+          name: user.name ?? undefined,
+        });
+
+        // Update user with Stripe customer ID
+        await db.user.update({
+          where: { id: user.id },
+          data: { stripeCustomerId: stripeCustomer.id },
+        });
+      } catch (error) {
+        console.error("Failed to create Stripe customer:", error);
+      }
+    },
   },
 } satisfies NextAuthConfig;

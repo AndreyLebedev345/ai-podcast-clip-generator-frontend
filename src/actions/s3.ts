@@ -38,7 +38,6 @@ export async function generateUploadUrl(fileInfo: {
     ContentType: fileInfo.contentType,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 600 });
 
   const uploadedFileDbRecord = await db.uploadedFile.create({
