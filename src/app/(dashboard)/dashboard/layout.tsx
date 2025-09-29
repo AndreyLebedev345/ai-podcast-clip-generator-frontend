@@ -23,9 +23,6 @@ export default async function DashboardLayout({
         },
         select: {
             credits: true,
-            email: true,
-            image: true,
-            name: true,
         },
     })
 
@@ -33,9 +30,8 @@ export default async function DashboardLayout({
         <div className="flex min-h-screen flex-col">
             <NavHeader
                 credits={user.credits}
-                email={user.email}
-                image={user.image}
-                name={user.name}
+                email={session.user.email ?? ""}
+                image={session.user.image ?? null}
             />
             <main className="container mx-auto flex-1 py-6">
             {children}
