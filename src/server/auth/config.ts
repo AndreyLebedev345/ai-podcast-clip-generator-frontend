@@ -44,14 +44,8 @@ export const authConfig = {
       ...session,
       user: {
         ...session.user,
-        id: token.sub!, // 'sub' is the standard JWT field for user ID
+        id: token.sub!,
       },
     }),
-    jwt: ({ token, user }) => {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
   },
 } satisfies NextAuthConfig;

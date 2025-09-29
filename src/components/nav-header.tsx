@@ -30,7 +30,7 @@ const NavHeader = ({
           <div className="font-sans text-xl font-medium tracking-tight">
             <span className="text-foreground">podcast</span>
             <span className="font-light text-gray-500">/</span>
-            <span className="text-foreground font-light">clipper</span>
+            <span className="text-foreground font-light">clip generator</span>
           </div>
         </Link>
 
