@@ -52,18 +52,14 @@ export const processVideo = inngest.createFunction(
                     });
                 });
         
-                await step.run("call-modal-endpoint", async () => {
-                    await fetch(env.PROCESS_VIDEO_ENDPOINT, {
-                        method: "POST",
-                        body: JSON.stringify({
-                            s3_key: s3Key,
-                        }),
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${env.PROCESS_VIDEO_ENDPOINT_AUTH}`,
-                        },
-                    });
-                });
+                await step.fetch(env.PROCESS_VIDEO_ENDPOINT, {
+                    method: "POST",
+                    body: JSON.stringify({ s3_key: s3Key }),
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${env.PROCESS_VIDEO_ENDPOINT_AUTH}`,
+                    },
+                  });
         
                 const { clipsFound } = await step.run("create-clips-in-db", async () => {
                     const folderPrefix = s3Key.split("/")[0]!;
