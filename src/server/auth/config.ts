@@ -32,16 +32,6 @@ declare module "next-auth" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
-// Debug logging for production
-console.log("Auth Config Debug:", {
-  hasGoogleId: !!process.env.AUTH_GOOGLE_ID,
-  hasGoogleSecret: !!process.env.AUTH_GOOGLE_SECRET,
-  hasAuthSecret: !!process.env.AUTH_SECRET,
-  nodeEnv: process.env.NODE_ENV,
-  googleIdLength: process.env.AUTH_GOOGLE_ID?.length,
-  googleSecretLength: process.env.AUTH_GOOGLE_SECRET?.length,
-});
-
 export const authConfig = {
   providers: [
     GoogleProvider({
@@ -51,7 +41,7 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
-  debug: true, // Enable debug mode
+  debug: process.env.NODE_ENV === "production", // Keep debug in production for now
   callbacks: {
     session: ({ session, token }) => ({
       ...session,
